@@ -2,10 +2,32 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { api } from '@/lib/api'
 
 export default function PatientLogin() {
   const [billCode, setBillCode] = useState('')
   const [dob, setDob] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    try {
+      await api(`/api/patients/verify-dob?pay_code=${encodeURIComponent(billCode)}&date_of_birth=${encodeURIComponent(dob)}`, {
+        method: 'POST',
+      })
+      router.push(`/pay/${encodeURIComponent(billCode)}?dob=${encodeURIComponent(dob)}`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Verification failed. Please check your bill code and date of birth.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-brand-100 flex flex-col">
@@ -15,7 +37,7 @@ export default function PatientLogin() {
             <span className="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center text-sm font-bold">+</span>
             PayVital
           </Link>
-          <Link href="/" className="text-[14px] text-brand-500 hover:text-brand-dark transition-colors">← Back to Home</Link>
+          <Link href="/" className="text-[14px] text-brand-500 hover:text-brand-dark transition-colors">&larr; Back to Home</Link>
         </div>
       </header>
 
@@ -28,26 +50,35 @@ export default function PatientLogin() {
               <p className="text-[14px] text-brand-500">Enter your bill code and date of birth to access your statement.</p>
             </div>
 
-            <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+            {error && (
+              <div className="bg-red-50 text-red-600 text-[13px] px-4 py-3 rounded-lg mb-4">{error}</div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="bill-code" className="block text-[14px] font-medium text-brand-dark mb-1.5">Bill Code</label>
-                <input id="bill-code" type="text" placeholder="e.g. PV-123456" value={billCode} onChange={(e) => setBillCode(e.target.value)}
+                <input id="bill-code" type="text" required placeholder="e.g. PV-123456" value={billCode} onChange={(e) => setBillCode(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-brand-300/40 text-[15px] text-brand-dark placeholder:text-brand-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
                 <p className="text-[12px] text-brand-500 mt-1">Find this on your text, email, or printed statement.</p>
               </div>
               <div>
                 <label htmlFor="dob" className="block text-[14px] font-medium text-brand-dark mb-1.5">Date of Birth</label>
-                <input id="dob" type="date" value={dob} onChange={(e) => setDob(e.target.value)}
+                <input id="dob" type="date" required value={dob} onChange={(e) => setDob(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-brand-300/40 text-[15px] text-brand-dark focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
               </div>
-              <button type="submit" className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 rounded-lg transition-all text-[15px]">
-                View My Bill
+              <button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 rounded-lg transition-all text-[15px] disabled:opacity-50">
+                {loading ? 'Verifying...' : 'View My Bill'}
               </button>
             </form>
 
             <p className="text-[12px] text-brand-500 text-center mt-6 pt-6 border-t border-brand-100">
               Need help? <a href="tel:+18887309374" className="text-primary font-medium">(888) 730-9374</a> or <a href="mailto:support@payvital.com" className="text-primary font-medium">support@payvital.com</a>
             </p>
+            <div className="flex justify-center gap-4 text-[12px] mt-2">
+              <Link href="/login/provider" className="text-primary font-medium hover:underline">Provider Login</Link>
+              <span className="text-brand-200">|</span>
+              <Link href="/login/admin" className="text-primary font-medium hover:underline">Admin Login</Link>
+            </div>
           </div>
         </div>
       </main>
