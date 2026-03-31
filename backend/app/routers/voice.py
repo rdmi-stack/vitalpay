@@ -6,10 +6,98 @@ from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.core.deps import get_current_user, get_provider
-from app.services.voice import get_ai_response, make_outbound_call
+from app.services.voice import get_ai_response, generate_speech, make_outbound_call
 from app.services.sms import send_payment_sms
 
 router = APIRouter(prefix="/voice", tags=["Voice Agent"])
+
+
+# --- Public chat endpoint (for website voice widget) ---
+
+class ChatMessage(BaseModel):
+    message: str
+    history: list[dict] = []
+
+
+DEMO_PATIENT = {
+    "name": "Sarah",
+    "amount_due": 245.00,
+    "provider_name": "Valley Health",
+    "service_description": "Office visit, March 5 2026",
+}
+
+FALLBACK_RESPONSES = {
+    "hello": "Hi! I'm the PayVital AI billing assistant. I can help you understand your medical bills, make payments, or set up a payment plan. How can I help you today?",
+    "bill": "You have a balance of $245.00 from Valley Health for an office visit on March 5th. Your insurance covered $235, leaving $245 as your responsibility. Would you like to pay now or set up a plan?",
+    "pay": "I can help with that! I'll send you a secure payment link via text right now. You can pay the full $245 or split it into monthly payments. Which do you prefer?",
+    "plan": "Absolutely! I can set up a payment plan for you. Here are your options: 3 months at $81.67/month, 6 months at $40.83/month, or 12 months at $20.42/month. Which works best?",
+    "how": "PayVital is an AI-powered healthcare billing platform. We help medical practices collect payments faster through text-to-pay, AI voice calls, and smart payment plans. Practices using PayVital see an 85% collection rate — up from the industry average of 55%.",
+    "cost": "PayVital pricing starts at $500/month for small practices, with transaction fees of 2.5-3.5%. Most practices see ROI within the first month — typically collecting an extra $30,000-$50,000 per month in previously lost revenue.",
+    "default": "I can help you with bill questions, payments, payment plans, or connect you with our team. What would you like to know?",
+}
+
+
+def get_fallback_response(message: str) -> str:
+    msg = message.lower()
+    if any(w in msg for w in ["hi", "hello", "hey", "start"]):
+        return FALLBACK_RESPONSES["hello"]
+    if any(w in msg for w in ["bill", "owe", "balance", "charge", "amount"]):
+        return FALLBACK_RESPONSES["bill"]
+    if any(w in msg for w in ["pay", "card", "link", "send"]):
+        return FALLBACK_RESPONSES["pay"]
+    if any(w in msg for w in ["plan", "monthly", "installment", "split"]):
+        return FALLBACK_RESPONSES["plan"]
+    if any(w in msg for w in ["how", "what", "payvital", "work", "about"]):
+        return FALLBACK_RESPONSES["how"]
+    if any(w in msg for w in ["cost", "price", "pricing", "much"]):
+        return FALLBACK_RESPONSES["cost"]
+    return FALLBACK_RESPONSES["default"]
+
+
+@router.post("/chat")
+async def voice_chat(body: ChatMessage):
+    """Public chat endpoint for the website voice widget. Uses OpenAI if available, otherwise smart fallback."""
+    import os
+    openai_key = os.getenv("OPENAI_API_KEY", "")
+
+    if openai_key:
+        response = await get_ai_response(DEMO_PATIENT, body.history, body.message)
+    else:
+        response = get_fallback_response(body.message)
+
+    return {"response": response}
+
+
+from fastapi import UploadFile, File
+from fastapi.responses import Response
+
+
+@router.post("/stt")
+async def speech_to_text(file: UploadFile = File(...)):
+    """Transcribe audio using ElevenLabs STT. Falls back to returning empty if no key."""
+    from app.services.voice import transcribe_audio, ELEVENLABS_API_KEY
+
+    audio_data = await file.read()
+
+    if not ELEVENLABS_API_KEY:
+        return {"text": "", "error": "ELEVENLABS_API_KEY not set. Add it to backend/.env"}
+
+    text = await transcribe_audio(audio_data)
+    return {"text": text}
+
+
+@router.post("/tts")
+async def text_to_speech(body: ChatMessage):
+    """Convert text to speech using ElevenLabs TTS. Returns audio bytes."""
+    from app.services.voice import generate_speech, ELEVENLABS_API_KEY
+
+    if not ELEVENLABS_API_KEY:
+        return Response(content=b"", media_type="audio/mpeg", headers={"X-Error": "No ElevenLabs key"})
+
+    audio = await generate_speech(body.message)
+    if audio:
+        return Response(content=audio, media_type="audio/mpeg")
+    return Response(content=b"", media_type="audio/mpeg", headers={"X-Error": "TTS failed"})
 
 
 class OutboundCallRequest(BaseModel):

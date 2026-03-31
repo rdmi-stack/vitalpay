@@ -18,7 +18,7 @@ class Settings(BaseSettings):
 
     # CORS — comma-separated allowed origins
     FRONTEND_URL: str = "http://localhost:3000"
-    CORS_ORIGINS: str = "http://localhost:3000,https://www.payvital.com,https://payvital.com,https://vitalpay.vercel.app"
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3010,http://localhost:3015,https://www.payvital.com,https://payvital.com,https://vitalpay.vercel.app"
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 

@@ -1,3 +1,5 @@
+import VoiceAgentWrapper from './VoiceAgentWrapper'
+
 export default function Hero() {
   return (
     <>
@@ -14,13 +16,13 @@ export default function Hero() {
         >
           <source src="/hero-bg.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-brand-dark/50" />
+        <div className="absolute inset-0 bg-brand-dark/60" />
         <div
           aria-hidden="true"
           className="absolute inset-0"
           style={{
             background:
-              'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99,91,255,0.2), transparent), radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,212,170,0.1), transparent)',
+              'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99,91,255,0.25), transparent), radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,212,170,0.15), transparent)',
           }}
         />
 
@@ -28,35 +30,61 @@ export default function Hero() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left: Text */}
             <div>
-              <p className="text-primary font-semibold text-[15px] mb-5 tracking-wide">
-                Healthcare payments infrastructure
+              <p className="text-primary font-semibold text-[15px] mb-5 tracking-wide uppercase">
+                The AI Patient Payment Platform
               </p>
               <h1 className="text-[clamp(2.4rem,5.5vw,4.2rem)] font-extrabold leading-[1.05] text-white mb-6 tracking-[-0.03em]">
-                Get paid more.
+                Collect more.
                 <br />
-                Get paid faster.
+                Collect faster.
+                <br />
+                <span className="text-primary">Automatically.</span>
               </h1>
-              <p className="text-lg text-white/50 leading-relaxed mb-8 max-w-[460px]">
-                The smarter way to bill and collect — maximizing revenue
-                and delivering a better experience for everyone.
+              <p className="text-lg text-white/50 leading-relaxed mb-5 max-w-[480px]">
+                PayVital combines text-to-pay, AI voice agents, and smart payment plans into one platform — accelerating cash flow, reducing cost to collect, and delivering a billing experience patients actually like.
               </p>
-              <div className="flex flex-wrap items-center gap-4">
+              <p className="text-[15px] text-white/70 font-medium mb-8 max-w-[480px]">
+                Works seamlessly with any EHR. HIPAA compliant. Live in days.
+              </p>
+              <div className="flex flex-wrap items-center gap-4 mb-8">
                 <a
-                  href="#contact"
-                  className="inline-flex items-center gap-2 bg-white text-brand-dark font-medium text-[15px] px-7 py-3.5 rounded-full hover:bg-white/90 transition-all duration-200"
+                  href="/demo"
+                  className="inline-flex items-center gap-2 bg-white text-brand-dark font-semibold text-[15px] px-7 py-3.5 rounded-full hover:bg-white/90 transition-all duration-200"
                 >
-                  Get started
+                  Book a Demo
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
                 </a>
                 <a
-                  href="#contact"
+                  href="#how-it-works"
                   className="inline-flex items-center gap-2 bg-transparent border border-white/30 text-white font-medium text-[15px] px-7 py-3.5 rounded-full hover:bg-white/10 hover:border-white/50 transition-all duration-200"
                 >
-                  Contact sales
+                  See How It Works
                 </a>
+              </div>
+              <div className="flex items-center gap-5">
+                <div className="text-center">
+                  <span className="block text-2xl font-extrabold text-emerald-400">85%</span>
+                  <span className="text-[11px] text-white/40">collection rate</span>
+                </div>
+                <div className="w-px h-10 bg-white/10" />
+                <div className="text-center">
+                  <span className="block text-2xl font-extrabold text-primary">15 days</span>
+                  <span className="text-[11px] text-white/40">avg A/R</span>
+                </div>
+                <div className="w-px h-10 bg-white/10" />
+                <div className="text-center">
+                  <span className="block text-2xl font-extrabold text-white">2x</span>
+                  <span className="text-[11px] text-white/40">patient collections</span>
+                </div>
+                <div className="w-px h-10 bg-white/10" />
+                <div className="text-center">
+                  <span className="block text-2xl font-extrabold text-white/90">90%</span>
+                  <span className="text-[11px] text-white/40">digital delivery</span>
+                </div>
               </div>
             </div>
 
-            {/* Right: Product Mockup */}
+            {/* Right: Product Mockup + Voice Widget */}
             <div className="relative flex justify-center lg:block">
               {/* iPad Device Frame — hidden on mobile */}
               <div className="hidden lg:block bg-[#e8e8ed] rounded-[20px] p-[10px] shadow-2xl w-full max-w-[520px] ring-1 ring-black/10">
@@ -161,12 +189,10 @@ export default function Hero() {
                         <svg className="w-3 h-3 text-brand-dark" fill="currentColor" viewBox="0 0 24 24"><path d="M2 22h20V2z" /></svg>
                       </div>
                     </div>
-
                     {/* URL bar */}
                     <div className="mx-3 mb-2 bg-gray-100 rounded-lg px-2 py-1 flex items-center justify-center">
                       <span className="text-[7px] text-brand-400">pay.payvital.com</span>
                     </div>
-
                     {/* App header */}
                     <div className="px-4 pb-2 flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
@@ -175,19 +201,16 @@ export default function Hero() {
                       </div>
                       <svg className="w-4 h-4 text-brand-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
                     </div>
-
                     {/* Content */}
                     <div className="px-4 py-3">
                       <p className="text-[13px] font-bold text-brand-dark text-center mb-1">Hi Sarah,</p>
                       <p className="text-[7.5px] text-brand-500 text-center leading-relaxed mb-3">
                         You have 1 medical bill from Valley Health. If you need assistance, we&apos;re here to help.
                       </p>
-
                       <div className="flex items-center justify-center gap-2 mb-3">
                         <span className="bg-primary text-white text-[7px] font-bold px-2 py-0.5 rounded-full">1 bill</span>
                         <span className="text-primary text-[7px] font-medium">View details</span>
                       </div>
-
                       {/* Bill card */}
                       <div className="bg-brand-50 rounded-xl p-3 mb-3">
                         <div className="flex justify-between items-center mb-2">
@@ -202,20 +225,23 @@ export default function Hero() {
                           <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </p>
                       </div>
-
                       <p className="text-[10px] font-bold text-brand-dark mb-1">Your medical bills</p>
                       <p className="text-primary text-[7px] font-medium flex items-center gap-1">
                         <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
                         Statement history
                       </p>
                     </div>
-
                     {/* iPhone home indicator */}
                     <div className="flex justify-center pb-2 pt-1">
                       <div className="w-[60px] h-[4px] bg-brand-dark/20 rounded-full" />
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Voice Agent Widget — bottom center under mockups */}
+              <div className="mt-6 lg:mt-0 lg:absolute lg:-bottom-24 lg:left-1/2 lg:-translate-x-1/2 z-20 flex justify-center">
+                <VoiceAgentWrapper />
               </div>
 
               {/* Glow behind mockups */}
