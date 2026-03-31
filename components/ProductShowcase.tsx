@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 const products = [
   {
     title: 'Text-to-Pay',
@@ -82,12 +84,12 @@ export default function ProductShowcase() {
               className="group bg-white rounded-2xl border border-brand-100 overflow-hidden hover:shadow-lg hover:border-brand-200 hover:-translate-y-1 transition-all duration-300"
             >
               <div className="relative h-48 overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={p.image}
                   alt={p.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
                 <div className={`absolute top-3 left-3 w-9 h-9 rounded-lg ${p.iconBg} flex items-center justify-center backdrop-blur-sm shadow-sm`}>
                   {p.icon}

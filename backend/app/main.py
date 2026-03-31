@@ -1,17 +1,23 @@
+import asyncio
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.core.config import settings
 from app.core.database import close_db, connect_db
-from app.routers import admin, auth, bills, claims, contact, dashboard, password_reset, patients, payments, statements, voice
+from app.services.scheduler import scheduler_loop
+from app.routers import admin, auth, bills, branding, claims, contact, dashboard, export, password_reset, patients, payments, statements, voice, webhooks, ws
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await connect_db()
+    # Start background scheduler for automated reminders
+    task = asyncio.create_task(scheduler_loop())
     yield
+    task.cancel()
     await close_db()
 
 
@@ -27,7 +33,7 @@ app = FastAPI(
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL, "http://localhost:3000"],
+    allow_origins=settings.cors_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -45,6 +51,24 @@ app.include_router(voice.router, prefix="/api")
 app.include_router(claims.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(password_reset.router, prefix="/api")
+app.include_router(export.router, prefix="/api")
+app.include_router(webhooks.router, prefix="/api")
+app.include_router(branding.router, prefix="/api")
+app.include_router(ws.router)
+
+
+## Rate Limiting Middleware
+from app.core.rate_limit import default_limiter, auth_limiter
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        if request.url.path.startswith("/api/auth"):
+            auth_limiter.check(request)
+        else:
+            default_limiter.check(request)
+        return await call_next(request)
+
+app.add_middleware(RateLimitMiddleware)
 
 
 @app.get("/api/health")

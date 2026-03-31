@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 const benefits = [
   { icon: '📱', title: 'Clear statements', desc: 'Mobile-friendly bills that make sense. No PDFs.' },
   { icon: '💳', title: 'Flexible payments', desc: 'Pay in full, enroll in a plan, or use saved methods.' },
@@ -57,12 +59,12 @@ export default function PatientExperience() {
             </div>
           </div>
           <div className="relative min-h-[300px] lg:min-h-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&h=600&fit=crop&crop=center"
               alt="Healthcare professional using PayVital"
-              className="absolute inset-0 w-full h-full object-cover"
-              loading="lazy"
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 50vw"
             />
           </div>
         </div>

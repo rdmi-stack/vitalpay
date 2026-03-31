@@ -16,10 +16,15 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # CORS
+    # CORS — comma-separated allowed origins
     FRONTEND_URL: str = "http://localhost:3000"
+    CORS_ORIGINS: str = "http://localhost:3000,https://www.payvital.com,https://payvital.com,https://vitalpay.vercel.app"
 
     model_config = {"env_file": ".env", "extra": "ignore"}
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
 
 
 settings = Settings()
